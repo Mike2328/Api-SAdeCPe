@@ -1,4 +1,4 @@
-import { createWriteStream } from 'fs';
+import { NotFoundException } from '@nestjs/common';
 import { Brackets, Repository } from 'typeorm';
 
 export abstract class BaseService<T> {
@@ -34,7 +34,7 @@ export abstract class BaseService<T> {
         });
 
         if(Object.keys(entityUpdate).length > 0){
-            const response = await this.getRepository().update(entity["id"], entityUpdate);
+            const response = await this.getRepository().update(entityUpdate["id"], entityUpdate);
             return (response["affected"] > 0)
                 ? { success: true, message: 'Exito al actualizar el registro'} 
                 : { success: false, message: 'Error al actualizar el registro'};
@@ -44,9 +44,5 @@ export abstract class BaseService<T> {
 
     async saveMany(Entities: T[]):  Promise<T[]>{
         return await this.getRepository().save(Entities);
-    }
-
-    async delete(id:any){
-        await this.getRepository().delete(id);
     }
 }

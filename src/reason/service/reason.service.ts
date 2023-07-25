@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { BaseService } from 'src/base/base.service';
 import { ReasonEntity } from '../entity/reason-entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,6 +15,7 @@ export class ReasonService extends BaseService<ReasonEntity>{
         let page = query.page == undefined ?  1 : parseInt(query.page);
         let search = query.search == undefined ? "" : query.search;
         let sortBy = query.sortBy == undefined ?  ["reason.name", "ASC"] : query.sortBy;
+        let statusReason = query.status == undefined ? 1 : query.status;
 
         if(sortBy == "character_asc"){
             sortBy = ["reason.name", "ASC"];
@@ -27,7 +28,8 @@ export class ReasonService extends BaseService<ReasonEntity>{
 
         let QB = this.reasonRP
             .createQueryBuilder("reason")
-            .where("reason.name LIKE :search", { search: `%${search}%` });
+            .where("reason.active = :status ", {status: statusReason})
+            .andWhere("CONCAT(reason.name, '', reason.description) LIKE :search", { search: `%${search}%` });
 
         const response = await QB
                         .orderBy(sortBy[0], sortBy[1])
@@ -53,6 +55,23 @@ export class ReasonService extends BaseService<ReasonEntity>{
         }
 
         return returnResponse;
+    }
+
+    async delete(id:number){
+        const entity = await this.reasonRP
+                            .createQueryBuilder("repo")
+                            .where("repo.id = :id", {id: id})
+                            .getOne();
+        if(entity){
+            entity["active"] = false;
+            await this.reasonRP.update(entity["id"], entity);
+            return {
+                "statusCode": 200,
+                "message": "Estado del colaborador actualizado",
+                "error": "-"
+            }
+        }
+        throw new NotFoundException(`El registro a eliminar no existe`);
     }
 
     getRepository(): Repository<ReasonEntity> {

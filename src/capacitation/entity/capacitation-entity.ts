@@ -1,5 +1,5 @@
-import { type } from "os";
 import { CapSessionEntity } from "src/cap_session/entity/cap_session-entity";
+import { CapTagsEntity } from "src/cap_tags/entity/cap_tags-entity";
 import { OrgEntity } from "src/organization/entity/org-entity";
 import { PriorityEntity } from "src/priority/entity/priority-entity";
 import { ReasonEntity } from "src/reason/entity/reason-entity";
@@ -32,9 +32,6 @@ export class CapacitationEntity {
     @Column({name: "COSTO_UNITARIO", type: "double", nullable: false})
     costUnit: number;
 
-    @Column({name: "COSTO_INICIAL", type: "double", nullable: false})
-    costInitial: number;
-
     @Column({name: "COSTO_FINAL", type: "double", nullable: false})
     costFinal: number;
 
@@ -46,6 +43,21 @@ export class CapacitationEntity {
 
     @Column({name: "EXTERNA", type: "bit", transformer: { from: (v: Buffer) => !!v.readInt8(0), to: (v) => v }, nullable: false})
     external: number;
+
+    @Column({name: "FECHA_CREACION", type: "varchar", length: 10, nullable: false})
+    creationDate: string;
+
+    @Column({name: "CAP_TOTAL_ASIS", type: "varchar", length: 10, nullable: false})
+    totalColEnrolled: string;
+
+    @Column({name: "CAP_TOTAL_SESIONS", type: "varchar", length: 10, nullable: false})
+    totalSession: string;
+
+    @Column({name: "ACTIVO", type: "bit", transformer: { from: (v: Buffer) => !!v.readInt8(0), to: (v) => v }, nullable: false})
+    active: boolean;
+
+    @Column({name: "COMENTARIO", type: "varchar", length: 200, nullable: true})
+    comment: string;
 
     @OneToOne((type) => OrgEntity)
     @JoinColumn({
@@ -85,4 +97,12 @@ export class CapacitationEntity {
         referencedColumnName:"capId"
     }) 
     sessions: CapSessionEntity[];
+
+    @OneToMany((type) => CapTagsEntity, (tag) => tag.cap)
+    @JoinColumn({
+        name: "ID_CAP", 
+        referencedColumnName:"capId"
+    }) 
+    tags: CapSessionEntity[];
+    
 }

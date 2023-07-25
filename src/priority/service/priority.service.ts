@@ -18,29 +18,33 @@ export class PriorityService extends BaseService<PriorityEntity>{
         let itemsperPage = query.limit == undefined ? 10 : parseInt(query.limit);
         let page = query.page == undefined ?  1 : parseInt(query.page);
         let search = query.search == undefined ? "" : query.search;
+        let sortBy = query.sortBy == undefined ?  ["priority.name", "ASC"] : query.sortBy;
+        let statusPriority = query.status == undefined ? 1 : query.status;
 
-        let queryOptionsTemp: FindManyOptions ={};
-        let queryOptions: FindManyOptions = {
-            skip: (itemsperPage * (page - 1)),
-            take: itemsperPage
-        };
+        if(sortBy == "character_asc"){
+            sortBy = ["priority.name", "ASC"];
+        }else if(sortBy == "character_desc"){
+            sortBy = ["priority.name", "DESC"];
+        }else if(sortBy == "date_asc"){
+            sortBy = ["priority.id", "ASC"];
+        }else if(sortBy == "date_desc")
+            sortBy = ["priority.id", "DESC"];
 
-        if(query.sortBy == "character_asc"){
-            queryOptions.order = {name: "ASC"};
-        }else if(query.sortBy == "character_desc"){
-            queryOptions.order = {name: "DESC"};
-        }else if(query.sortBy == "date_asc"){
-            queryOptions.order = {id: "ASC"};
-        }else if(query.sortBy == "date_desc")
-            queryOptions.order = {id: "DESC"};
+        let QB = this.priorityRP
+            .createQueryBuilder("priority")
+            .where("priority.active = :status", {status: statusPriority})
+            .andWhere("CONCAT(priority.name, ' ', priority.description) LIKE :search", { search: `%${search}%`});
 
-        queryOptions.where = [{name: Like(`%${search}%`)},{description: Like(`%${search}%`)}];
-        queryOptionsTemp.where = [{name: Like(`%${search}%`)}, {description: Like(`%${search}%`)}];
+        const response = await QB
+            .orderBy(sortBy[0], sortBy[1])
+            .skip(itemsperPage * (page - 1))
+            .take(itemsperPage)
+            .getMany();
 
-        const response = await this.priorityRP.find(queryOptions);
-        const responseCount = await this.priorityRP.count(queryOptionsTemp).then((items) => {
-            return [items, Math.ceil(items / itemsperPage)];
-        });
+        const responseCount = await QB
+            .getCount().then((items) => {
+                return [items, Math.ceil(items / itemsperPage)];
+            });
 
         let totalItems = responseCount[0];
         let pageCount = responseCount[1];

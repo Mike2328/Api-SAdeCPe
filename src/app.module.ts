@@ -19,6 +19,11 @@ import { CapSessionModule } from './cap_session/cap_session.module';
 import { CapacitationModule } from './capacitation/capacitation.module';
 import { ReasonModule } from './reason/reason.module';
 import { AssistanceModule } from './assistance/assistance.module';
+import { ConfigModule } from '@nestjs/config'
+import { AuthModule } from './auth/auth.module';
+import { StadisticsModule } from './stadistics/stadistics.module';
+import { MainModule } from './main/main.module';
+
 
 @Module({
   imports: [
@@ -47,7 +52,14 @@ import { AssistanceModule } from './assistance/assistance.module';
     CapSessionModule,
     CapacitationModule,
     ReasonModule,
-    AssistanceModule
+    AssistanceModule,
+    ConfigModule.forRoot({
+      envFilePath: `.env`,
+      isGlobal: true
+    }),
+    AuthModule,
+    StadisticsModule,
+    MainModule
   ],
   controllers: [AppController],
   providers: [AppService],

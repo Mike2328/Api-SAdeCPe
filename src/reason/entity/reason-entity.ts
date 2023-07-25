@@ -13,4 +13,7 @@ export class ReasonEntity {
 
     @Column({name: "ACTIVO", type: "bit", transformer: { from: (v: Buffer) => !!v.readInt8(0), to: (v) => v }, nullable: false})
     active: boolean;
+
+    @Column({name: "FECHA_CREACION", type: "varchar", length: 10, nullable: false})
+    creationDate: string;
 }
