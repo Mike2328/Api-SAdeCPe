@@ -19,11 +19,11 @@ import { CapSessionModule } from './cap_session/cap_session.module';
 import { CapacitationModule } from './capacitation/capacitation.module';
 import { ReasonModule } from './reason/reason.module';
 import { AssistanceModule } from './assistance/assistance.module';
-import { ConfigModule } from '@nestjs/config'
 import { AuthModule } from './auth/auth.module';
 import { StadisticsModule } from './stadistics/stadistics.module';
 import { MainModule } from './main/main.module';
-
+import * as dotenv from "dotenv";
+dotenv.config();
 
 @Module({
   imports: [
@@ -31,9 +31,9 @@ import { MainModule } from './main/main.module';
       type:'mysql',
       host:'localhost',
       port: 3306,
-      username:'root',
-      password:'cap123',
-      database:'sadecpe',
+      username: process.env.USER,
+      password: process.env.PASSWORD,
+      database: process.env.DATABASE,
       autoLoadEntities: true
     }),
     DepartamentModule,
@@ -53,10 +53,10 @@ import { MainModule } from './main/main.module';
     CapacitationModule,
     ReasonModule,
     AssistanceModule,
-    ConfigModule.forRoot({
-      envFilePath: `.env`,
-      isGlobal: true
-    }),
+    // ConfigModule.forRoot({
+    //   envFilePath: `.env`,
+    //   isGlobal: true
+    // }),
     AuthModule,
     StadisticsModule,
     MainModule
